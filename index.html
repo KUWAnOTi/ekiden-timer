@@ -12,11 +12,11 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap">
 <style>
 /* Layout: sticky header with tabs; race view = one-screen grid of numbered team tiles sized to fit ~20 teams on an iPad */
 :root{
-  --paper:#f3f4f7; --card:#ffffff; --ink:#18203a; --muted:#5d6580; --line:#d9dce6;
+  --paper:#e6e9f0; --card:#ffffff; --ink:#18203a; --muted:#5d6580; --line:#d9dce6;
   --ai:#25358f;          /* 藍: primary accent */
   --ai-soft:#e4e7f6;
   --sash:#b4232f;        /* タスキ */
@@ -25,17 +25,22 @@
   --f-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
   --f-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --r:10px;
+  --tile-shadow:0 1px 2px rgba(20,30,60,.12);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#11141f; --card:#1a1f2e; --ink:#e8eaf2; --muted:#9aa1b9; --line:#2c3347;
+/* 画面の明るさ：アプリの設定（data-app-theme）が端末の設定より優先される */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-app-theme="light"]){
+  --paper:#0b0d15; --card:#1d2333; --ink:#e8eaf2; --muted:#9aa1b9; --line:#323a52;
   --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552;
   --ok:#5fd19a; --ok-soft:#173a2a; --warn:#f0b35c; --warn-soft:#3d2d14; color-scheme:dark;
+  --tile-shadow:0 1px 3px rgba(0,0,0,.55);
 }}
-:root[data-theme="dark"]{
-  --paper:#11141f; --card:#1a1f2e; --ink:#e8eaf2; --muted:#9aa1b9; --line:#2c3347;
+:root[data-theme="dark"]:not([data-app-theme="light"]), :root[data-app-theme="dark"]{
+  --paper:#0b0d15; --card:#1d2333; --ink:#e8eaf2; --muted:#9aa1b9; --line:#323a52;
   --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552;
   --ok:#5fd19a; --ok-soft:#173a2a; --warn:#f0b35c; --warn-soft:#3d2d14; color-scheme:dark;
+  --tile-shadow:0 1px 3px rgba(0,0,0,.55);
 }
+:root[data-app-theme="light"]{color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-tap-highlight-color:transparent}
@@ -87,12 +92,12 @@ a.btn{color:var(--ink);display:inline-block;text-decoration:none}
 .prehint{margin:0 0 10px}
 
 .tiles{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:120px}
-.tile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;min-width:0;min-height:0}
+.tile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--tile-shadow);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;min-width:0;min-height:0}
 .tile .no{background:var(--tc);color:var(--tci);font-family:var(--f-display);font-size:var(--nofs,40px);line-height:1;display:flex;align-items:center;justify-content:center;width:2.05em;flex:none;padding:0;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
 .tile .body{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-width:0;padding:7px 10px 7px 10px}
 .tile .lab{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile.has-undo .lab{padding-right:44px}
-.tile .tn{font-size:var(--tnfs,17px);font-weight:700;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.tile .tn{font-size:var(--tnfs,18px);font-weight:900;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere;padding-bottom:3px;border-bottom:2px solid var(--tc)}
 .tile .prog{align-self:center;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;min-width:0;max-width:100%;padding-top:2px}
 .tile .big{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600;font-size:var(--pgfs,34px);line-height:1;letter-spacing:-.02em;white-space:nowrap}
 .tile .big small{font-size:.55em;color:var(--muted);font-weight:500;margin-left:1px}
@@ -105,7 +110,7 @@ a.btn{color:var(--ink);display:inline-block;text-decoration:none}
 .tile.anchor{border:2px solid var(--ink)}
 .tile.anchor .big{color:var(--sash)}
 .tile.anchor .big::before{content:"アンカー";font-family:var(--f-body);font-size:11px;font-weight:700;letter-spacing:.04em;margin-right:6px;vertical-align:middle}
-.tile.done{background:var(--ok-soft);border-color:transparent;cursor:default}
+.tile.done{background:var(--ok-soft);border-color:transparent;box-shadow:none;cursor:default}
 .tile.done .no{filter:saturate(.35);opacity:.75}
 .tile.done .big{color:var(--ok)}
 .tile.hit{animation:hit .7s ease-out}
@@ -254,7 +259,12 @@ function migrate(){
     if (!t.color) t.color = COLORS[i % COLORS.length];
   });
   if (S.guard == null) S.guard = 3;
+  if (!["auto","light","dark"].includes(S.theme)) S.theme = "auto";
   if (!S.race) S.race = { start: null, splits: {} };
+}
+function applyTheme(){
+  const v = S.theme || "auto", r = document.documentElement;
+  if (v === "auto") r.removeAttribute("data-app-theme"); else r.setAttribute("data-app-theme", v);
 }
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
 
@@ -419,6 +429,9 @@ function renderSetup(){
       <label class="field"><span class="lbl">大会名</span><input id="f-ev" value="${esc(S.eventName)}"></label>
       <div class="field"><span class="lbl">1チームの人数</span>
         <div class="stepper"><button type="button" id="legMinus" ${lock?"disabled":""} aria-label="減らす">−</button><output id="legOut">${S.legs}</output><button type="button" id="legPlus" ${lock?"disabled":""} aria-label="増やす">＋</button><span class="note">人</span></div></div>
+      <div class="field"><span class="lbl">画面の明るさ</span>
+        <div class="seg" role="group" aria-label="画面の明るさ">${[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]].map(([v, l]) => `<button type="button" data-theme-set="${v}" aria-pressed="${(S.theme || "auto") === v}">${l}</button>`).join("")}</div>
+        <span class="note">iPad がダークモードでも、ここで「ライト」にすればこのアプリだけ明るい画面になります</span></div>
       <label class="field"><span class="lbl">二重押し防止（秒）</span><input id="f-guard" type="number" min="0" max="60" step="1" value="${S.guard}"><span class="note">同じチームの連続タップをこの秒数だけ無視します</span></label>
     </div>
     ${lock ? `<p class="note">計測が始まっているため、人数・チーム数の変更と名簿の読み込みはできません。番号・名前・色の修正はできます。</p>` : ""}
@@ -504,6 +517,7 @@ document.addEventListener("change", e => {
 $("#v-setup").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "legMinus" || b.id === "legPlus") { S.legs = Math.max(1, Math.min(30, S.legs + (b.id === "legPlus" ? 1 : -1))); touchSetup(); renderSetup(); }
+  else if (b.dataset.themeSet) { S.theme = b.dataset.themeSet; save(); applyTheme(); renderSetup(); }
   else if (b.id === "pickRoster") $("#rosterIn").click();
   else if (b.id === "applyImport" && pending) {
     S.teams = pending.teams; S.legs = pending.legs; S.race = { start: null, splits: {} };
@@ -544,7 +558,7 @@ $("#fileIn").addEventListener("change", e => {
     try {
       const d = JSON.parse(rd.result);
       if (!Array.isArray(d.teams) || !d.legs || !d.race) throw 0;
-      S = d; migrate(); save(); render(); toast("バックアップから復元しました");
+      S = d; migrate(); save(); applyTheme(); render(); toast("バックアップから復元しました");
     } catch(err) { toast("このファイルは読み込めませんでした。このアプリで保存した .json を選んでください"); }
     e.target.value = "";
   };
@@ -618,7 +632,7 @@ function fitTiles(){
   g.style.gridAutoRows = `${Math.floor(h)}px`;
   const scale = Math.max(.72, Math.min(1.25, Math.min(h / 140, ((W - (c - 1) * gap) / c) / 220)));
   g.style.setProperty("--nofs", `${Math.round(36 * scale)}px`);
-  g.style.setProperty("--tnfs", `${Math.round(17 * scale)}px`);
+  g.style.setProperty("--tnfs", `${Math.round(18 * scale)}px`);
   g.style.setProperty("--pgfs", `${Math.round(34 * scale)}px`);
 }
 window.addEventListener("resize", () => { if (view === "race") fitTiles(); });
@@ -842,6 +856,7 @@ setInterval(() => {
 }, 100);
 
 window.addEventListener("hashchange", route);
+applyTheme();
 if (started() && !allDone()) requestWake();
 route();
 // オフライン用：GitHub Pages など普通のサイトに置いたときだけ sw.js を登録する
