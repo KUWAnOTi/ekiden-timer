@@ -89,22 +89,25 @@ a.btn{color:var(--ink);display:inline-block;text-decoration:none}
 .tiles{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:120px}
 .tile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;min-width:0;min-height:0}
 .tile .no{background:var(--tc);color:var(--tci);font-family:var(--f-display);font-size:var(--nofs,40px);line-height:1;display:flex;align-items:center;justify-content:center;width:2.05em;flex:none;padding:0;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
-.tile .body{display:flex;flex-direction:column;min-width:0;padding:7px 9px 6px 10px;gap:1px}
+.tile .body{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-width:0;padding:7px 10px 7px 10px}
 .tile .lab{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile .tn{font-size:var(--tnfs,18px);font-weight:700;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
-.tile .meta{margin-top:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:baseline;min-width:0;white-space:nowrap}
-.tile .meta .rn{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.tile .meta .lt{font-family:var(--f-num);font-variant-numeric:tabular-nums}
-.tile .leg{font-family:var(--f-num);font-weight:600;color:var(--ink)}
-.tile .undo{position:absolute;right:5px;bottom:5px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--muted);font-weight:700}
+.tile.has-undo .lab{padding-right:44px}
+.tile .tn{font-size:var(--tnfs,17px);font-weight:700;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.tile .prog{align-self:center;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;min-width:0;max-width:100%;padding-top:2px}
+.tile .big{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600;font-size:var(--pgfs,34px);line-height:1;letter-spacing:-.02em;white-space:nowrap}
+.tile .big small{font-size:.55em;color:var(--muted);font-weight:500;margin-left:1px}
+.tile .sub{font-size:12px;color:var(--muted);white-space:nowrap;display:flex;gap:5px;max-width:100%;min-width:0;margin-top:2px}
+.tile .sub .rn{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tile .sub .lt{font-family:var(--f-num);font-variant-numeric:tabular-nums;color:var(--ink);flex:none}
+.tile .undo{position:absolute;right:5px;top:5px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--muted);font-weight:700}
 .tile .undo.armed{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
-.tile.has-undo .meta{padding-right:46px}
 .tile.idle{opacity:.6;cursor:default}
 .tile.anchor{border:2px solid var(--ink)}
-.tile.anchor .leg::after{content:" アンカー";font-family:var(--f-body);font-size:11px;color:var(--sash)}
+.tile.anchor .big{color:var(--sash)}
+.tile.anchor .big::before{content:"アンカー";font-family:var(--f-body);font-size:11px;font-weight:700;letter-spacing:.04em;margin-right:6px;vertical-align:middle}
 .tile.done{background:var(--ok-soft);border-color:transparent;cursor:default}
 .tile.done .no{filter:saturate(.35);opacity:.75}
-.tile.done .fin{color:var(--ok);font-weight:700}
+.tile.done .big{color:var(--ok)}
 .tile.hit{animation:hit .7s ease-out}
 @keyframes hit{0%{box-shadow:inset 0 0 0 200px var(--tc)}100%{box-shadow:inset 0 0 0 0 transparent}}
 .tile:active:not(.idle):not(.done){transform:scale(.985)}
@@ -414,8 +417,8 @@ function renderSetup(){
     <h2>大会</h2>
     <div class="fields">
       <label class="field"><span class="lbl">大会名</span><input id="f-ev" value="${esc(S.eventName)}"></label>
-      <div class="field"><span class="lbl">1チームの人数（区間数）</span>
-        <div class="stepper"><button type="button" id="legMinus" ${lock?"disabled":""} aria-label="減らす">−</button><output id="legOut">${S.legs}</output><button type="button" id="legPlus" ${lock?"disabled":""} aria-label="増やす">＋</button><span class="note">人 / 区</span></div></div>
+      <div class="field"><span class="lbl">1チームの人数</span>
+        <div class="stepper"><button type="button" id="legMinus" ${lock?"disabled":""} aria-label="減らす">−</button><output id="legOut">${S.legs}</output><button type="button" id="legPlus" ${lock?"disabled":""} aria-label="増やす">＋</button><span class="note">人</span></div></div>
       <label class="field"><span class="lbl">二重押し防止（秒）</span><input id="f-guard" type="number" min="0" max="60" step="1" value="${S.guard}"><span class="note">同じチームの連続タップをこの秒数だけ無視します</span></label>
     </div>
     ${lock ? `<p class="note">計測が始まっているため、人数・チーム数の変更と名簿の読み込みはできません。番号・名前・色の修正はできます。</p>` : ""}
@@ -429,7 +432,7 @@ function renderSetup(){
     </div>`}
     ${pending ? `<div class="preview" id="preview">
       <div><b>${esc(pending.source)}</b> から ${pending.teams.length}チーム・各${pending.legs}人を読み取りました。内容を確認して置き換えてください。</div>
-      <div class="tablebox"><table><thead><tr><th>番号</th><th>研究室</th><th>チーム</th>${Array.from({length: pending.legs}, (_, i) => `<th>${i+1}区</th>`).join("")}</tr></thead><tbody>
+      <div class="tablebox"><table><thead><tr><th>番号</th><th>研究室</th><th>チーム</th>${Array.from({length: pending.legs}, (_, i) => `<th>走者${i+1}</th>`).join("")}</tr></thead><tbody>
       ${pending.teams.map(t => `<tr><td><span class="nob" style="${tcs(t)}">${t.no}</span></td><td class="sub">${esc(t.lab)}</td><td><b>${esc(t.name)}</b></td>${Array.from({length: pending.legs}, (_, i) => `<td>${esc(t.runners[i] || "")}${t.grades[i] ? ` <span class="note">${esc(t.grades[i])}</span>` : ""}</td>`).join("")}</tr>`).join("")}
       </tbody></table></div>
       <div class="row"><button class="btn primary" id="applyImport">このデータで置き換える</button><button class="btn" id="cancelImport">やめる</button>
@@ -446,13 +449,13 @@ function renderSetup(){
         ${openPalette === t.id ? `<div class="palette">${COLORS.map(c => `<button type="button" data-col="${c}" style="background:${c}" aria-label="色 ${c}" aria-pressed="${tc(t).toLowerCase() === c.toLowerCase()}"></button>`).join("")}
           <label>ほかの色 <input type="color" data-f="color" value="${tc(t)}"></label></div>` : ""}
         <div class="runners">${Array.from({length: S.legs}, (_, k) => `
-          <label><span>${k+1}区</span><input class="tinput" data-f="r" data-k="${k}" value="${esc(t.runners[k] || "")}" placeholder="${k+1}走の名前"><input class="tinput gr" data-f="g" data-k="${k}" value="${esc(t.grades[k] || "")}" placeholder="学年" aria-label="${k+1}走の学年"></label>`).join("")}
+          <label><span>${k+1}</span><input class="tinput" data-f="r" data-k="${k}" value="${esc(t.runners[k] || "")}" placeholder="${k+1}走の名前"><input class="tinput gr" data-f="g" data-k="${k}" value="${esc(t.grades[k] || "")}" placeholder="学年" aria-label="${k+1}走の学年"></label>`).join("")}
         </div>
       </div>`).join("")}
     </div>
     <details style="margin-top:16px">
       <summary>表を貼り付けて入力</summary>
-      <p class="note">エクセルの範囲をコピーして貼り付けます。見出し行ごと貼れば名簿ファイルと同じように読み取ります。見出しがない場合は「チーム名, 1区, 2区, …」の順に読みます。</p>
+      <p class="note">エクセルの範囲をコピーして貼り付けます。見出し行ごと貼れば名簿ファイルと同じように読み取ります。見出しがない場合は「チーム名, 走者1, 走者2, …」の順に読みます。</p>
       <textarea id="bulk" placeholder="研究室名	チーム名	出走者1	出走者2	…"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn primary" id="bulkGo" ${lock?"disabled":""}>読み取る</button></div>
     </details>
@@ -561,12 +564,12 @@ function renderRace(){
     <div class="clock" ${st && !done ? `data-since="${S.race.start}"` : ""}>${st ? fmtDur((done ? endEp : Date.now()) - S.race.start) : "0:00.0"}</div>
     <div class="clockmeta">
       <span class="status ${done ? "done" : st ? "run" : ""}"><span class="dot"></span>${done ? "全チームゴール" : st ? "計測中" : "スタート前"}</span>
-      <span class="note">${st ? `スタート ${fmtClock(S.race.start, true)} ・ ゴール ${finishedCount} / ${S.teams.length}` : `${S.teams.length}チーム × ${S.legs}区`}</span>
+      <span class="note">${st ? `スタート ${fmtClock(S.race.start, true)} ・ ゴール ${finishedCount} / ${S.teams.length}` : `${S.teams.length}チーム × ${S.legs}人`}</span>
     </div>
     <span class="spacer"></span>
     ${st ? `<button class="btn sm" id="editStart">スタート時刻を修正</button><a class="btn sm" href="#results">記録を見る</a>` : `<button class="startbtn" id="startBtn" ${S.teams.length ? "" : "disabled"}>スタート</button>`}
   </div>
-  ${st ? "" : `<p class="note prehint">スタート後、タスキを渡した瞬間にそのチームのボタン（番号の札）を押します。押し間違えたら右下の「取消」を2回押します。</p>`}
+  ${st ? "" : `<p class="note prehint">スタート後、タスキを渡した瞬間にそのチームのボタン（番号の札）を押します。押し間違えたら右上の「取消」を2回押します。</p>`}
   <div class="tiles" id="tiles">${byNo().map(tile).join("")}</div>`;
   if (hitId) { const h = el.querySelector(`.tile[data-team="${hitId}"]`); if (h) h.classList.add("hit"); hitId = null; }
   fitTiles();
@@ -575,21 +578,22 @@ function tile(t){
   const sp = splits(t), n = sp.length, st = started(), fin = finished(t);
   const ua = undoArmed[t.id] > Date.now();
   const undo = n > 0 ? `<button class="undo ${ua ? "armed" : ""}" data-act="undo" aria-label="${esc(label(t))}の直前の記録を取り消す">${ua ? "もう一度" : "取消"}</button>` : "";
-  let meta;
+  const anchor = !fin && n === S.legs - 1;
+  let prog;
   if (fin) {
     const r = standings().filter(x => finished(x.t)).findIndex(x => x.t === t) + 1;
-    meta = `<span class="fin">ゴール ${r}位</span><span class="lt">${fmtDur(total(t))}</span>`;
+    prog = `<div class="big">${r}<small>位</small></div><div class="sub">ゴール <span class="lt">${fmtDur(total(t))}</span></div>`;
   } else {
-    meta = `<span class="leg">${n+1}/${S.legs}区</span><span class="rn">${esc(t.runners[n] || "")}</span>` +
-      (st ? `<span class="lt" data-since="${legStart(t, n)}">${fmtDur(Date.now() - legStart(t, n))}</span>` : "");
+    prog = `<div class="big">${n+1}<small>/${S.legs}</small></div>
+      <div class="sub"><span class="rn">${esc(t.runners[n] || "")}</span>${st ? `<span class="lt" data-since="${legStart(t, n)}">${fmtDur(Date.now() - legStart(t, n))}</span>` : ""}</div>`;
   }
-  const cls = ["tile", !st ? "idle" : "", fin ? "done" : "", (!fin && n === S.legs - 1) ? "anchor" : "", undo ? "has-undo" : ""].filter(Boolean).join(" ");
-  return `<div class="${cls}" style="${tcs(t)}" data-team="${t.id}" role="button" tabindex="${st && !fin ? 0 : -1}" aria-disabled="${!st || fin}" aria-label="${esc(label(t))}（${esc(t.lab)}）${fin ? "ゴール済み" : `${n+1}区 タスキ渡し`}">
+  const cls = ["tile", !st ? "idle" : "", fin ? "done" : "", anchor ? "anchor" : "", undo ? "has-undo" : ""].filter(Boolean).join(" ");
+  return `<div class="${cls}" style="${tcs(t)}" data-team="${t.id}" role="button" tabindex="${st && !fin ? 0 : -1}" aria-disabled="${!st || fin}" aria-label="${esc(label(t))}（${esc(t.lab)}）${fin ? "ゴール済み" : `${n+1}/${S.legs}人目 タスキ渡し`}">
     <div class="no">${t.no}</div>
     <div class="body">
       <div class="lab">${esc(t.lab) || "&nbsp;"}</div>
       <div class="tn">${esc(t.name)}</div>
-      <div class="meta">${meta}</div>
+      <div class="prog">${prog}</div>
     </div>
     ${undo}
   </div>`;
@@ -614,7 +618,8 @@ function fitTiles(){
   g.style.gridAutoRows = `${Math.floor(h)}px`;
   const scale = Math.max(.72, Math.min(1.25, Math.min(h / 140, ((W - (c - 1) * gap) / c) / 220)));
   g.style.setProperty("--nofs", `${Math.round(36 * scale)}px`);
-  g.style.setProperty("--tnfs", `${Math.round(18 * scale)}px`);
+  g.style.setProperty("--tnfs", `${Math.round(17 * scale)}px`);
+  g.style.setProperty("--pgfs", `${Math.round(34 * scale)}px`);
 }
 window.addEventListener("resize", () => { if (view === "race") fitTiles(); });
 function pass(id){
@@ -626,7 +631,7 @@ function pass(id){
   splits(t).push(now); save();
   const n = splits(t).length;
   hitId = id; renderRace();
-  toast(finished(t) ? `${label(t)} ゴール ${fmtDur(total(t))}` : `${label(t)} ${n}区 ${t.runners[n-1] || ""} ${fmtDur(splits(t)[n-1] - legStart(t, n-1))}`);
+  toast(finished(t) ? `${label(t)} ゴール ${fmtDur(total(t))}` : `${label(t)} ${n}/${S.legs} ${t.runners[n-1] || ""} ${fmtDur(splits(t)[n-1] - legStart(t, n-1))}`);
   if (allDone()) releaseWake();
 }
 $("#v-race").addEventListener("pointerdown", e => {
@@ -659,17 +664,17 @@ let rMode = "ind", sortKey = "lap", sortDir = 1, legFilter = "all";
 function renderResults(){
   const el = $("#v-results");
   if (!started()) { el.innerHTML = `${sampleBanner()}<div class="panel empty">まだ計測していません。「計測」でスタートすると、ここに個人記録とチーム総合が並びます。</div>${exportBar()}`; return; }
-  const legOpts = `<option value="all">全区間</option>` + Array.from({length: S.legs}, (_, i) => `<option value="${i+1}" ${legFilter == i+1 ? "selected" : ""}>${i+1}区</option>`).join("");
+  const legOpts = `<option value="all">すべて</option>` + Array.from({length: S.legs}, (_, i) => `<option value="${i+1}" ${legFilter == i+1 ? "selected" : ""}>${i+1}人目</option>`).join("");
   el.innerHTML = `${sampleBanner()}
   <div class="rtabs">
     <div class="seg" role="group" aria-label="表示">
       <button data-mode="ind" aria-pressed="${rMode === "ind"}">個人記録</button>
       <button data-mode="team" aria-pressed="${rMode === "team"}">チーム総合</button>
     </div>
-    ${rMode === "ind" ? `<label class="row note" style="gap:6px">区間 <select id="legSel" class="tinput" style="width:auto">${legOpts}</select></label>` : ""}
+    ${rMode === "ind" ? `<label class="row note" style="gap:6px">走順 <select id="legSel" class="tinput" style="width:auto">${legOpts}</select></label>` : ""}
   </div>
   <div class="tablebox">${rMode === "ind" ? indTable() : teamTable()}</div>
-  <p class="note">${rMode === "ind" ? "見出しを押すと並び替えます。赤字は区間1位。「修正」でタスキを渡した時刻を直せます。" : "ゴールしたチームは総合タイム順、走行中のチームは進んだ区間順に並びます。"}</p>
+  <p class="note">${rMode === "ind" ? "見出しを押すと並び替えます。赤字はその走順のラップ1位。「修正」でタスキを渡した時刻を直せます。" : "ゴールしたチームは総合タイム順、走行中のチームは進んだ区間順に並びます。"}</p>
   ${exportBar()}`;
 }
 function exportBar(){
@@ -699,11 +704,11 @@ function indTable(){
     return c * sortDir || tie;
   });
   const th = (k, l) => `<th><button data-sort="${k}" ${sortKey === k ? `data-dir="${sortDir > 0 ? "▲" : "▼"}"` : ""}>${l}</button></th>`;
-  return `<table><thead><tr>${th("no","番号")}${th("lab","研究室")}${th("team","チーム")}${th("leg","走順")}${th("name","名前")}<th>学年</th>${th("lap","区間タイム")}${th("rank","区間順位")}${th("start","走り始め")}${th("end","走り終わり")}<th></th></tr></thead><tbody>
+  return `<table><thead><tr>${th("no","番号")}${th("lab","研究室")}${th("team","チーム")}${th("leg","走順")}${th("name","名前")}<th>学年</th>${th("lap","ラップ")}${th("rank","ラップ順位")}${th("start","走り始め")}${th("end","走り終わり")}<th></th></tr></thead><tbody>
   ${rows.map(r => `<tr>
     <td><span class="nob" style="${tcs(r.team)}">${r.team.no}</span></td>
     <td class="sub">${esc(r.team.lab)}</td><td>${esc(r.team.name)}</td>
-    <td class="t">${r.leg}区</td><td>${esc(r.name)}</td><td class="sub">${esc(r.grade)}</td>
+    <td class="t">${r.leg}</td><td>${esc(r.name)}</td><td class="sub">${esc(r.grade)}</td>
     <td class="t ${r.rank === 1 ? "best" : ""}">${r.lap != null ? fmtDur(r.lap) : (r.start != null && splits(r.team).length === r.leg - 1 ? "走行中" : "—")}</td>
     <td class="t">${r.rank ?? "—"}</td>
     <td class="t">${fmtClock(r.start, true)}</td><td class="t">${fmtClock(r.end, true)}</td>
@@ -713,13 +718,13 @@ function indTable(){
 function teamTable(){
   const legRk = Array.from({length: S.legs}, (_, i) => legRanks(i));
   let place = 0;
-  return `<table><thead><tr><th>順位</th><th>番号</th><th>研究室</th><th>チーム</th><th>総合タイム</th><th>状況</th>${Array.from({length: S.legs}, (_, i) => `<th>${i+1}区</th>`).join("")}<th>ゴール時刻</th></tr></thead><tbody>
+  return `<table><thead><tr><th>順位</th><th>番号</th><th>研究室</th><th>チーム</th><th>総合タイム</th><th>状況</th>${Array.from({length: S.legs}, (_, i) => `<th>走者${i+1}</th>`).join("")}<th>ゴール時刻</th></tr></thead><tbody>
   ${standings().map(({ t, n }) => {
     const fin = finished(t); if (fin) place++;
     return `<tr><td class="rk">${fin ? place : "—"}</td>
       <td><span class="nob" style="${tcs(t)}">${t.no}</span></td><td class="sub">${esc(t.lab)}</td><td>${esc(t.name)}</td>
       <td class="t">${fin ? fmtDur(total(t)) : "—"}</td>
-      <td>${fin ? "ゴール" : `${n+1}区 走行中`}</td>
+      <td>${fin ? "ゴール" : `${n+1}/${S.legs} 走行中`}</td>
       ${Array.from({length: S.legs}, (_, i) => n > i ? `<td class="t ${legRk[i][t.id] === 1 ? "best" : ""}" title="${esc(t.runners[i] || "")}">${fmtDur(splits(t)[i] - legStart(t, i))}</td>` : `<td class="t">—</td>`).join("")}
       <td class="t">${fin ? fmtClock(splits(t)[S.legs-1], true) : "—"}</td></tr>`;
   }).join("")}</tbody></table>`;
@@ -741,12 +746,12 @@ function openEdit(target){
   editing = target;
   if (target.type === "start") {
     $("#mTitle").textContent = "スタート時刻を修正";
-    $("#mNote").textContent = "スタートを押すのが遅れたときなどに、実際の号砲の時刻を入れます。全チームの1区タイムが変わります。";
+    $("#mNote").textContent = "スタートを押すのが遅れたときなどに、実際の号砲の時刻を入れます。全チームの1人目のラップが変わります。";
     $("#mInput").value = fmtClock(S.race.start, true);
   } else {
     const t = S.teams.find(x => x.id === target.id);
-    $("#mTitle").textContent = `${label(t)} ${target.i+1}区の走り終わり時刻`;
-    $("#mNote").textContent = `${t.runners[target.i] || ""} がタスキを渡した（ゴールした）時刻を「時:分:秒.1/10秒」で入れます。この区間と次の区間のタイムが変わります。`;
+    $("#mTitle").textContent = `${label(t)} ${target.i+1}人目の走り終わり時刻`;
+    $("#mNote").textContent = `${t.runners[target.i] || ""} がタスキを渡した（ゴールした）時刻を「時:分:秒.1/10秒」で入れます。この人と次の人のラップが変わります。`;
     $("#mInput").value = fmtClock(splits(t)[target.i], true);
   }
   $("#mErr").textContent = ""; $("#modal").hidden = false; $("#mInput").focus(); $("#mInput").select();
@@ -758,13 +763,13 @@ $("#modalForm").addEventListener("submit", e => {
   if (v == null) { $("#mErr").textContent = "「10:23:45.6」の形で入力してください"; return; }
   if (editing.type === "start") {
     const firsts = S.teams.map(t => splits(t)[0]).filter(x => x != null);
-    if (firsts.length && v >= Math.min(...firsts)) { $("#mErr").textContent = "1区の最初のタスキ渡しより前の時刻にしてください"; return; }
+    if (firsts.length && v >= Math.min(...firsts)) { $("#mErr").textContent = "1人目の最初のタスキ渡しより前の時刻にしてください"; return; }
     S.race.start = v;
   } else {
     const t = S.teams.find(x => x.id === editing.id), sp = splits(t), i = editing.i;
     const lo = legStart(t, i), hi = sp[i + 1];
-    if (v <= lo) { $("#mErr").textContent = `この区間の走り始め（${fmtClock(lo, true)}）より後にしてください`; return; }
-    if (hi != null && v >= hi) { $("#mErr").textContent = `次の区間の走り終わり（${fmtClock(hi, true)}）より前にしてください`; return; }
+    if (v <= lo) { $("#mErr").textContent = `この人の走り始め（${fmtClock(lo, true)}）より後にしてください`; return; }
+    if (hi != null && v >= hi) { $("#mErr").textContent = `次の人の走り終わり（${fmtClock(hi, true)}）より前にしてください`; return; }
     sp[i] = v;
   }
   save(); $("#modal").hidden = true; editing = null; render(); toast("修正しました");
@@ -793,7 +798,7 @@ function exportXlsx(){
   const wb = XLSX.utils.book_new();
   let place = 0;
   const L = S.legs;
-  const tHead = ["順位","番号","研究室名","チーム名","総合タイム", ...Array.from({length: L}, (_, i) => `${i+1}区`), "ゴール時刻"];
+  const tHead = ["順位","番号","研究室名","チーム名","総合タイム", ...Array.from({length: L}, (_, i) => `走者${i+1}`), "ゴール時刻"];
   const tRows = standings().map(({ t, n }) => { const fin = finished(t); if (fin) place++;
     return [fin ? place : "", t.no, t.lab, t.name, fin ? total(t) / DAY : "", ...Array.from({length: L}, (_, i) => n > i ? (splits(t)[i] - legStart(t, i)) / DAY : ""), fin ? clockFrac(splits(t)[L-1]) : ""]; });
   const ws1 = XLSX.utils.aoa_to_sheet([tHead, ...tRows]);
@@ -801,7 +806,7 @@ function exportXlsx(){
   fmtCols(ws1, tRows.length, [5 + L], "hh:mm:ss.0");
   ws1["!cols"] = tHead.map((_, i) => ({ wch: i === 2 ? 14 : i === 3 ? 20 : 10 }));
   XLSX.utils.book_append_sheet(wb, ws1, "チーム総合");
-  const iHead = ["番号","研究室名","チーム名","走順","名前","学年","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"];
+  const iHead = ["番号","研究室名","チーム名","走順","名前","学年","ラップタイム","ラップ順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"];
   const iRows = individualRows().map(r => [r.team.no, r.team.lab, r.team.name, r.leg, r.name, r.grade, r.lap != null ? r.lap / DAY : "", r.rank ?? "", r.start != null ? clockFrac(r.start) : "", r.end != null ? clockFrac(r.end) : "", total(r.team) != null ? total(r.team) / DAY : ""]);
   const ws2 = XLSX.utils.aoa_to_sheet([iHead, ...iRows]);
   fmtCols(ws2, iRows.length, [6, 10], "[h]:mm:ss.0");
@@ -809,7 +814,7 @@ function exportXlsx(){
   ws2["!cols"] = [6, 14, 20, 6, 16, 10, 11, 8, 13, 13, 14].map(w => ({ wch: w }));
   ws2["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: iRows.length, c: iHead.length - 1 } }) };
   XLSX.utils.book_append_sheet(wb, ws2, "個人記録");
-  const info = XLSX.utils.aoa_to_sheet([["大会名", S.eventName], ["スタート時刻", fmtClock(S.race.start, true)], ["チーム数", S.teams.length], ["区間数", S.legs], ["書き出し", new Date().toLocaleString("ja-JP")]]);
+  const info = XLSX.utils.aoa_to_sheet([["大会名", S.eventName], ["スタート時刻", fmtClock(S.race.start, true)], ["チーム数", S.teams.length], ["人数", S.legs], ["書き出し", new Date().toLocaleString("ja-JP")]]);
   info["!cols"] = [{ wch: 12 }, { wch: 28 }];
   XLSX.utils.book_append_sheet(wb, info, "大会情報");
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -820,7 +825,7 @@ function fmtCols(ws, n, cols, z){
 }
 function exportCsv(){
   const q = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const lines = [["番号","研究室名","チーム名","走順","名前","学年","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"].join(",")];
+  const lines = [["番号","研究室名","チーム名","走順","名前","学年","ラップタイム","ラップ順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"].join(",")];
   individualRows().forEach(r => lines.push([r.team.no, r.team.lab, r.team.name, r.leg, r.name, r.grade, r.lap != null ? fmtDur(r.lap) : "", r.rank ?? "", r.start != null ? fmtClock(r.start, true) : "", r.end != null ? fmtClock(r.end, true) : "", total(r.team) != null ? fmtDur(total(r.team)) : ""].map(q).join(",")));
   saveFile(baseName() + "_個人記録.csv", "﻿" + lines.join("\r\n"), "text/csv");
 }
