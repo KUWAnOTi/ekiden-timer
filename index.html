@@ -14,13 +14,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* Layout: sticky header with tabs; race view = fixed-order grid of large tappable team cards (iPad landscape first) */
+/* Layout: sticky header with tabs; race view = one-screen grid of numbered team tiles sized to fit ~20 teams on an iPad */
 :root{
   --paper:#f3f4f7; --card:#ffffff; --ink:#18203a; --muted:#5d6580; --line:#d9dce6;
   --ai:#25358f;          /* 藍: primary accent */
   --ai-soft:#e4e7f6;
-  --sash:#b4232f;        /* タスキ: pass button */
-  --sash-ink:#ffffff;
+  --sash:#b4232f;        /* タスキ */
   --ok:#1d7a4c; --ok-soft:#dff1e7; --warn:#a35b00; --warn-soft:#fbecd6;
   --f-display:"Dela Gothic One","Hiragino Kaku Gothic StdN","Yu Gothic",sans-serif;
   --f-body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
@@ -29,12 +28,12 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#11141f; --card:#1a1f2e; --ink:#e8eaf2; --muted:#9aa1b9; --line:#2c3347;
-  --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552; --sash-ink:#ffffff;
+  --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552;
   --ok:#5fd19a; --ok-soft:#173a2a; --warn:#f0b35c; --warn-soft:#3d2d14; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --paper:#11141f; --card:#1a1f2e; --ink:#e8eaf2; --muted:#9aa1b9; --line:#2c3347;
-  --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552; --sash-ink:#ffffff;
+  --ai:#8d9cf0; --ai-soft:#262e4f; --sash:#d84552;
   --ok:#5fd19a; --ok-soft:#173a2a; --warn:#f0b35c; --warn-soft:#3d2d14; color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -49,15 +48,16 @@ button{cursor:pointer}
 
 /* header */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:8px}
 .brand{display:flex;align-items:baseline;gap:10px;min-width:0;flex:1}
-.brand h1{font-family:var(--f-display);font-weight:400;font-size:20px;margin:0;letter-spacing:.02em;white-space:nowrap}
+.brand h1{font-family:var(--f-display);font-weight:400;font-size:19px;margin:0;letter-spacing:.02em;white-space:nowrap}
 .brand .ev{color:var(--muted);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tabs{display:flex;gap:4px;background:var(--paper);padding:4px;border-radius:999px}
-.tabs a{padding:8px 18px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-size:14px}
+.tabs a{padding:7px 18px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:700;font-size:14px}
 .tabs a[aria-current="page"]{background:var(--ai);color:#fff}
 
 main .wrap{padding-block:20px 60px}
+body.is-race main .wrap{padding-block:10px 10px;max-width:none}
 h2{font-family:var(--f-display);font-weight:400;font-size:18px;margin:0 0 12px;text-wrap:balance}
 .lbl{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700}
 .note{color:var(--muted);font-size:13px}
@@ -65,73 +65,82 @@ h2{font-family:var(--f-display);font-weight:400;font-size:18px;margin:0 0 12px;t
 
 .btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 16px;font-weight:700;font-size:14px}
 .btn:hover{border-color:var(--ai)}
-a.btn{color:var(--ink);display:inline-block}
+a.btn{color:var(--ink);display:inline-block;text-decoration:none}
 .btn.primary{background:var(--ai);border-color:var(--ai);color:#fff}
 .btn.danger{color:var(--sash);border-color:var(--sash)}
 .btn.danger.armed{background:var(--sash);color:#fff}
+.btn.sm{padding:6px 12px;font-size:13px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* race */
-.board{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:18px}
-.clock{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600;font-size:clamp(44px,8vw,84px);line-height:1;letter-spacing:-.02em}
-.clockmeta{display:flex;flex-direction:column;gap:4px}
-.status{display:inline-flex;align-items:center;gap:8px;font-weight:700}
+.board{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;margin-bottom:10px}
+.clock{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:600;font-size:clamp(30px,4vw,48px);line-height:1;letter-spacing:-.02em}
+.clockmeta{display:flex;flex-direction:column;gap:0;line-height:1.35}
+.status{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
 .status.run .dot{background:var(--sash);animation:blink 1s steps(2) infinite}
 .status.done .dot{background:var(--ok)}
 @keyframes blink{50%{opacity:.25}}
-@media (prefers-reduced-motion:reduce){.status.run .dot{animation:none}}
-.startbtn{font-family:var(--f-display);font-weight:400;font-size:28px;background:var(--ai);color:#fff;border:0;border-radius:14px;padding:18px 48px;min-height:80px}
 .board .spacer{flex:1}
+.startbtn{font-family:var(--f-display);font-weight:400;font-size:24px;background:var(--ai);color:#fff;border:0;border-radius:12px;padding:12px 40px}
+.prehint{margin:0 0 10px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.team{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;min-width:0}
-.team.flash{animation:flash .6s ease-out}
-@keyframes flash{0%{box-shadow:0 0 0 6px var(--tc)}100%{box-shadow:0 0 0 0 transparent}}
-.team .hd{display:flex;align-items:center;gap:8px;justify-content:space-between}
-.chip{background:var(--tc);color:var(--tci,#fff);font-weight:700;border-radius:6px;padding:3px 10px;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.legpos{font-family:var(--f-num);font-size:13px;color:var(--muted);white-space:nowrap}
-.rank{font-size:12px;font-weight:700;color:var(--ai);background:var(--ai-soft);border-radius:999px;padding:1px 8px;white-space:nowrap}
-.runner{font-size:20px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.legtime{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:34px;font-weight:600;line-height:1.1}
-.prev{font-size:13px;color:var(--muted);min-height:1.5em}
-.pass{background:var(--sash);color:var(--sash-ink);border:0;border-radius:10px;min-height:92px;padding:10px;font-family:var(--f-display);font-weight:400;font-size:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.pass small{font-family:var(--f-body);font-size:14px;font-weight:700;opacity:.9}
-.pass.goal{background:var(--ink);color:var(--paper)}
-.pass:active{transform:scale(.98)}
-.pass:disabled{opacity:.35;cursor:not-allowed}
-.undo{align-self:flex-end;background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--muted);font-weight:700}
-.undo.armed{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
-.fin{display:flex;align-items:baseline;gap:10px;color:var(--ok);font-weight:700}
-.fin b{font-family:var(--f-display);font-weight:400;font-size:30px}
-.team.done{background:var(--ok-soft);border-color:transparent}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.tiles{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:120px}
+.tile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);border-radius:12px;overflow:hidden;background:var(--card);border:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;min-width:0;min-height:0}
+.tile .no{background:var(--tc);color:var(--tci);font-family:var(--f-display);font-size:var(--nofs,40px);line-height:1;display:flex;align-items:center;justify-content:center;width:2.05em;flex:none;padding:0;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.tile .body{display:flex;flex-direction:column;min-width:0;padding:7px 9px 6px 10px;gap:1px}
+.tile .lab{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .tn{font-size:var(--tnfs,18px);font-weight:700;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.tile .meta{margin-top:auto;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:baseline;min-width:0;white-space:nowrap}
+.tile .meta .rn{overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.tile .meta .lt{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.tile .leg{font-family:var(--f-num);font-weight:600;color:var(--ink)}
+.tile .undo{position:absolute;right:5px;bottom:5px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-size:11px;color:var(--muted);font-weight:700}
+.tile .undo.armed{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.tile.has-undo .meta{padding-right:46px}
+.tile.idle{opacity:.6;cursor:default}
+.tile.anchor{border:2px solid var(--ink)}
+.tile.anchor .leg::after{content:" アンカー";font-family:var(--f-body);font-size:11px;color:var(--sash)}
+.tile.done{background:var(--ok-soft);border-color:transparent;cursor:default}
+.tile.done .no{filter:saturate(.35);opacity:.75}
+.tile.done .fin{color:var(--ok);font-weight:700}
+.tile.hit{animation:hit .7s ease-out}
+@keyframes hit{0%{box-shadow:inset 0 0 0 200px var(--tc)}100%{box-shadow:inset 0 0 0 0 transparent}}
+.tile:active:not(.idle):not(.done){transform:scale(.985)}
+@media (prefers-reduced-motion:reduce){.status.run .dot{animation:none}.tile.hit{animation:none}}
 
 /* setup */
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:18px}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
-.field input,.field select,textarea,.tinput{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+.field input,.field select,textarea,.tinput{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
 .stepper{display:flex;align-items:center;gap:6px}
 .stepper button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-size:20px;font-weight:700}
 .stepper output{font-family:var(--f-num);font-size:20px;min-width:2.5ch;text-align:center}
-.teams{display:flex;flex-direction:column;gap:12px}
-.tedit{border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--paper)}
-.tedit .h{display:flex;gap:10px;align-items:center}
+.import{border:2px dashed var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.import.drag{border-color:var(--ai);background:var(--ai-soft)}
+.preview{border:1px solid var(--ai);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;margin-bottom:16px;background:var(--ai-soft)}
+.teams{display:flex;flex-direction:column;gap:10px}
+.tedit{border:1px solid var(--line);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--paper)}
+.tedit .h{display:grid;grid-template-columns:auto 64px minmax(0,1fr) minmax(0,1.3fr) auto;gap:8px;align-items:center}
+.tedit .h input{background:var(--card)}
+.tedit .h .tno{font-family:var(--f-num);text-align:center;font-weight:700}
+.tedit .h .tname{font-weight:700}
 .swatch{width:40px;height:40px;border-radius:8px;background:var(--tc);flex:none;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;color:var(--tci,#fff);font-size:11px;font-weight:700}
 .palette{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:8px}
-.palette button{width:36px;height:36px;border-radius:8px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line)}
+.palette button{width:34px;height:34px;border-radius:8px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--line)}
 .palette button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
 .palette label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--muted);margin-left:6px}
-.palette input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--paper)}
-.tedit .h input{flex:1;font-weight:700;background:var(--card)}
-.runners{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.runners label{display:flex;align-items:center;gap:6px;min-width:0}
-.runners span{font-family:var(--f-num);font-size:12px;color:var(--muted);width:2.6em;flex:none}
-.runners input{background:var(--card)}
-textarea{min-height:120px;font-family:var(--f-num);font-size:13px}
+.palette input[type=color]{width:44px;height:34px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--paper)}
+.runners{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+.runners label{display:grid;grid-template-columns:2.4em minmax(0,1fr) 4.2em;gap:4px;align-items:center;min-width:0}
+.runners span{font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.runners input{background:var(--card);padding:6px 8px}
+.runners input.gr{font-size:12px;padding:6px 4px;text-align:center}
+textarea{min-height:110px;font-family:var(--f-num);font-size:13px}
 details summary{cursor:pointer;font-weight:700}
+@media (max-width:640px){.tedit .h{grid-template-columns:auto 56px minmax(0,1fr) auto}.tedit .h .tlab{grid-column:2/-1;grid-row:2}}
 
 /* results */
 .rtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
@@ -140,14 +149,15 @@ details summary{cursor:pointer;font-weight:700}
 .seg button[aria-pressed="true"]{background:var(--ai);color:#fff}
 .tablebox{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
 table{border-collapse:collapse;width:100%;font-size:14px}
-th,td{padding:9px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
-th{font-size:12px;color:var(--muted);letter-spacing:.05em;background:var(--paper);position:sticky;top:0}
+th,td{padding:8px 11px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);letter-spacing:.05em;background:var(--paper)}
 th button{background:none;border:0;padding:0;font:inherit;color:inherit;font-weight:700;letter-spacing:inherit}
 th button[data-dir]::after{content:attr(data-dir);margin-left:4px;color:var(--ai)}
 td.t{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 td.rk{font-family:var(--f-display);font-size:16px}
+td.sub{color:var(--muted);font-size:13px}
 tr:last-child td{border-bottom:0}
-.tdot{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--tc);margin-right:6px;vertical-align:middle}
+.nob{display:inline-flex;align-items:center;justify-content:center;min-width:1.9em;height:1.6em;padding:0 4px;border-radius:5px;background:var(--tc);color:var(--tci);font-family:var(--f-display);font-size:13px}
 .best{color:var(--sash);font-weight:700}
 .mini{background:none;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
@@ -156,8 +166,9 @@ tr:last-child td{border-bottom:0}
 .modal{position:fixed;inset:0;background:rgba(10,12,20,.55);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
 .modal .box{background:var(--card);border-radius:14px;padding:20px;width:min(420px,100%);display:flex;flex-direction:column;gap:12px}
 .err{color:var(--sash);font-size:13px;min-height:1.2em}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-weight:700;z-index:30;max-width:calc(100% - 32px)}
-@media (max-width:600px){.brand .ev{display:none}.tabs a{padding:7px 12px}.startbtn{width:100%}}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:999px;font-weight:700;z-index:30;max-width:calc(100% - 32px);pointer-events:none}
+body.is-race .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px))}
+@media (max-width:600px){.brand .ev{display:none}.tabs a{padding:7px 12px}}
 </style>
 
 <header class="top"><div class="wrap">
@@ -189,6 +200,7 @@ tr:last-child td{border-bottom:0}
 </div>
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="fileIn" accept=".json,application/json" hidden>
+<input type="file" id="rosterIn" accept=".xlsx,.xls,.csv,.txt" hidden>
 
 <script>/*! SheetJS (xlsx 0.18.5 mini) Apache-2.0 https://sheetjs.com */
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -206,27 +218,41 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 (function(){
 "use strict";
 const KEY = "ekiden-timer-v1";
-const COLORS = ["#c62f3b","#1f5fbf","#1d8a5b","#c77d00","#7b3fb4","#0f8a9a","#c2417e","#5b6b17","#8a5a2b","#46557a","#e0602a","#2a7f3f","#9c2b6e","#3a6fd1","#6b6b6b","#00897b"];
+const COLORS = ["#c62f3b","#1f5fbf","#1d8a5b","#c77d00","#7b3fb4","#0f8a9a","#c2417e","#5b6b17","#8a5a2b","#46557a",
+                "#e0602a","#2a9d8f","#9c2b6e","#3a6fd1","#6b6b6b","#00897b","#b8860b","#5e35b1","#d81b60","#2e7d32"];
 const uid = () => Math.random().toString(36).slice(2, 9);
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFKC").replace(/\s+/g, " ").trim();
 
 function sampleState(){
-  const t = (name, rs) => ({ id: uid(), name, runners: rs });
-  return {
-    v: 1, sample: true, eventName: "〇〇学科 駅伝大会", legs: 5, guard: 3,
-    teams: [
-      t("1年A", ["青木","伊藤","上田","江藤","小川"]),
-      t("1年B", ["加藤","木村","工藤","剣持","小林"]),
-      t("2年", ["佐藤","清水","須藤","関","園田"]),
-      t("院生・教員", ["田中","千葉","津田","寺島","豊田"])
-    ],
-    race: { start: null, splits: {} }
-  };
+  const labs = ["青葉","片平","川内","星陵","雨宮","八木山","五橋","荒巻","国見","台原"];
+  const sur = ["青木","伊藤","上田","江藤","小川","加藤","木村","工藤","剣持","小林","佐藤","清水","須藤","関","園田","田中","千葉","津田","寺島","豊田","中村","西田","沼田","根本","野口"];
+  const teams = [];
+  labs.forEach((l, i) => ["A","B"].forEach((ab, j) => {
+    const k = i * 2 + j;
+    teams.push({ id: uid(), no: k + 1, lab: `${l}研究室`, name: `${l}研${ab}`, color: COLORS[k % COLORS.length],
+      runners: Array.from({ length: 5 }, (_, r) => sur[(k * 3 + r * 7) % sur.length]), grades: [] });
+  }));
+  return { v: 2, sample: true, eventName: "〇〇学科 駅伝大会", legs: 5, guard: 3, teams, race: { start: null, splits: {} } };
 }
 let S;
 try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
 if (!S || !Array.isArray(S.teams)) S = sampleState();
+migrate();
+function migrate(){
+  let used = new Set(S.teams.map(t => t.no).filter(n => Number.isFinite(n)));
+  let next = 1;
+  S.teams.forEach((t, i) => {
+    if (!Number.isFinite(t.no)) { while (used.has(next)) next++; t.no = next; used.add(next); }
+    if (t.lab == null) t.lab = "";
+    if (!Array.isArray(t.runners)) t.runners = [];
+    if (!Array.isArray(t.grades)) t.grades = [];
+    if (!t.color) t.color = COLORS[i % COLORS.length];
+  });
+  if (S.guard == null) S.guard = 3;
+  if (!S.race) S.race = { start: null, splits: {} };
+}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
 
 /* ---------- time helpers ---------- */
@@ -243,7 +269,7 @@ function fmtClock(ep, tenth){
   return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` + (tenth ? "." + Math.floor(d.getMilliseconds()/100) : "");
 }
 function parseClock(str, baseEp){
-  const m = String(str).trim().replace(/：/g, ":").match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?$/);
+  const m = norm(str).match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})(?:\.(\d{1,3}))?$/);
   if (!m) return null;
   const d = new Date(baseEp);
   d.setHours(+m[1], +m[2], +m[3], m[4] ? Math.round(+("0." + m[4]) * 1000) : 0);
@@ -251,11 +277,13 @@ function parseClock(str, baseEp){
 }
 
 /* ---------- derived ---------- */
-const color = (i) => (S.teams[i] && S.teams[i].color) || COLORS[i % COLORS.length];
+const tc = t => t.color || COLORS[0];
 function inkFor(hex){ const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "#fff"; const n = parseInt(m[1], 16);
   const L = c => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
   const lum = .2126 * L(n >> 16) + .7152 * L((n >> 8) & 255) + .0722 * L(n & 255); return lum > .4 ? "#14182a" : "#ffffff"; }
-const tcs = (i) => `--tc:${color(i)};--tci:${inkFor(color(i))}`;
+const tcs = t => `--tc:${tc(t)};--tci:${inkFor(tc(t))}`;
+const byNo = () => S.teams.slice().sort((a, b) => a.no - b.no);
+const label = t => `${t.no}番 ${t.name}`;
 let openPalette = null;
 const splits = t => S.race.splits[t.id] || (S.race.splits[t.id] = []);
 const started = () => S.race.start != null;
@@ -264,25 +292,25 @@ const allDone = () => started() && S.teams.length > 0 && S.teams.every(finished)
 function legStart(t, i){ return i === 0 ? S.race.start : splits(t)[i - 1]; }
 function total(t){ return finished(t) ? splits(t)[S.legs - 1] - S.race.start : null; }
 function standings(){
-  return S.teams.map((t, idx) => ({ t, idx, n: splits(t).length, last: splits(t).length ? splits(t)[splits(t).length - 1] : Infinity }))
-    .sort((a, b) => b.n - a.n || a.last - b.last || a.idx - b.idx);
+  return S.teams.map(t => ({ t, n: splits(t).length, last: splits(t).length ? splits(t)[splits(t).length - 1] : Infinity }))
+    .sort((a, b) => b.n - a.n || a.last - b.last || a.t.no - b.t.no);
 }
 function positionOf(t){
   if (!started() || splits(t).length === 0) return null;
   return standings().findIndex(x => x.t === t) + 1;
 }
-function legRanks(i){ // map teamId -> rank for leg i
+function legRanks(i){
   const arr = S.teams.filter(t => splits(t).length > i).map(t => ({ id: t.id, lap: splits(t)[i] - legStart(t, i) })).sort((a, b) => a.lap - b.lap);
   const r = {}; arr.forEach((x, k) => { r[x.id] = (k > 0 && x.lap === arr[k-1].lap) ? r[arr[k-1].id] : k + 1; }); return r;
 }
 function individualRows(){
   const ranks = Array.from({ length: S.legs }, (_, i) => legRanks(i));
   const rows = [];
-  S.teams.forEach((t, ti) => {
+  byNo().forEach(t => {
     for (let i = 0; i < S.legs; i++) {
       const done = splits(t).length > i;
       const st = started() && splits(t).length >= i ? legStart(t, i) : null;
-      rows.push({ team: t, ti, leg: i + 1, name: t.runners[i] || "", start: st, end: done ? splits(t)[i] : null,
+      rows.push({ team: t, leg: i + 1, name: t.runners[i] || "", grade: t.grades[i] || "", start: st, end: done ? splits(t)[i] : null,
         lap: done ? splits(t)[i] - legStart(t, i) : null, rank: done ? ranks[i][t.id] : null });
     }
   });
@@ -298,6 +326,7 @@ function route(){
   view = ["setup","race","results"].includes(h) ? h : (started() ? "race" : "setup");
   document.querySelectorAll(".tabs a").forEach(a => { if (a.dataset.view === view) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
   ["setup","race","results"].forEach(v => $("#v-" + v).hidden = v !== view);
+  document.body.classList.toggle("is-race", view === "race");
   render();
 }
 function render(){
@@ -306,13 +335,80 @@ function render(){
   else if (view === "race") renderRace();
   else renderResults();
 }
-const sampleBanner = () => S.sample ? `<div class="banner">表示中のチームと名前はサンプルです。「設定」で自分たちのチームに書き換えてください。</div>` : "";
+const sampleBanner = () => S.sample ? `<div class="banner">表示中のチームと名前はサンプルです。「設定」で名簿ファイルを読み込むか、自分たちのチームに書き換えてください。</div>` : "";
+
+/* ---------- roster import ---------- */
+// 見出し行（研究室名・チーム名・出走者1…・学年1…・番号）を探して読み込む。見出しがなければ「チーム名, 1走, 2走…」として読む。
+function parseAoa(aoa){
+  const rows = aoa.map(r => (r || []).map(norm));
+  for (let h = 0; h < Math.min(rows.length, 15); h++) {
+    const col = { lab: -1, team: -1, no: -1, run: {}, gr: {} };
+    rows[h].forEach((c, j) => {
+      if (!c) return; let m;
+      if ((m = c.match(/^(?:出走者|走者|ランナー|選手|氏名|名前)\s*(\d+)$/)) || (m = c.match(/^第?\s*(\d+)\s*(?:区|走|走者)$/))) col.run[+m[1]] = j;
+      else if ((m = c.match(/^学年\s*(\d+)$/))) col.gr[+m[1]] = j;
+      else if (col.no < 0 && /^(?:no\.?|番号|チーム番号|ゼッケン|ナンバー|#)$/i.test(c)) col.no = j;
+      else if (col.lab < 0 && /(研究室|所属|ラボ|lab)/i.test(c) && !/チーム/.test(c)) col.lab = j;
+      else if (col.team < 0 && /(チーム|team)/i.test(c)) col.team = j;
+    });
+    const legNos = Object.keys(col.run).map(Number);
+    if (col.team < 0 || !legNos.length) continue;
+    const L = Math.max(...legNos), teams = [];
+    for (let r = h + 1; r < rows.length; r++) {
+      const row = rows[r], name = row[col.team]; if (!name) continue;
+      const runners = [], grades = [];
+      for (let k = 1; k <= L; k++) { runners.push(col.run[k] != null ? row[col.run[k]] || "" : ""); grades.push(col.gr[k] != null ? row[col.gr[k]] || "" : ""); }
+      const n = col.no >= 0 ? parseInt(row[col.no], 10) : NaN;
+      teams.push({ no: Number.isFinite(n) ? n : null, lab: col.lab >= 0 ? row[col.lab] : "", name, runners, grades });
+    }
+    if (teams.length) return { teams, legs: L, header: true };
+  }
+  const teams = rows.filter(r => r[0]).map(r => { const rs = r.slice(1); while (rs.length && !rs[rs.length-1]) rs.pop(); return { no: null, lab: "", name: r[0], runners: rs, grades: [] }; });
+  if (!teams.length) return null;
+  return { teams, legs: Math.max(1, ...teams.map(t => t.runners.length)), header: false };
+}
+function finishImport(res, source){
+  const used = new Set(); let next = 1;
+  res.teams.forEach(t => { if (Number.isFinite(t.no) && !used.has(t.no)) used.add(t.no); else t.no = null; });
+  res.teams.forEach(t => { if (t.no == null) { while (used.has(next)) next++; t.no = next; used.add(next); } });
+  res.teams.sort((a, b) => a.no - b.no);
+  res.teams.forEach((t, i) => { t.id = uid(); t.color = COLORS[i % COLORS.length]; });
+  pending = { ...res, source };
+}
+let pending = null;
+function readRosterFile(f){
+  const rd = new FileReader();
+  const isText = /\.(csv|txt)$/i.test(f.name);
+  rd.onload = () => {
+    try {
+      let res = null;
+      if (typeof XLSX !== "undefined") {
+        const wb = XLSX.read(rd.result, { type: "array" });
+        for (const sn of wb.SheetNames) {
+          const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: "", raw: false });
+          const r = parseAoa(aoa);
+          if (r && r.header) { res = r; res.sheet = sn; break; }
+          if (r && !res) { res = r; res.sheet = sn; }
+        }
+      } else if (isText) {
+        const txt = new TextDecoder("utf-8").decode(rd.result);
+        res = parseAoa(txt.split(/\r?\n/).map(l => l.split(/\t|,/)));
+      } else { toast("エクセルを読む部品を読み込めませんでした。CSVで保存して読み込んでください"); return; }
+      if (!res) { toast("チームが見つかりませんでした。1行目に「チーム名」「出走者1」などの見出しがあるか確認してください"); return; }
+      finishImport(res, f.name + (res.sheet ? `（${res.sheet}シート）` : ""));
+      renderSetup(); const p = $("#preview"); if (p) p.scrollIntoView({ block: "start", behavior: "smooth" });
+    } catch(err) { toast("このファイルは読み込めませんでした（" + (err.message || err) + "）"); }
+  };
+  rd.readAsArrayBuffer(f);
+}
+$("#rosterIn").addEventListener("change", e => { const f = e.target.files[0]; if (f) readRosterFile(f); e.target.value = ""; });
 
 /* ---------- setup ---------- */
-let armedReset = 0;
+let armedReset = 0, clearArmed = 0;
 function renderSetup(){
   const lock = started();
   const el = $("#v-setup");
+  const dup = (() => { const c = {}; S.teams.forEach(t => c[t.no] = (c[t.no] || 0) + 1); return Object.keys(c).filter(k => c[k] > 1); })();
   el.innerHTML = `${sampleBanner()}
   <div class="panel">
     <h2>大会</h2>
@@ -322,27 +418,43 @@ function renderSetup(){
         <div class="stepper"><button type="button" id="legMinus" ${lock?"disabled":""} aria-label="減らす">−</button><output id="legOut">${S.legs}</output><button type="button" id="legPlus" ${lock?"disabled":""} aria-label="増やす">＋</button><span class="note">人 / 区</span></div></div>
       <label class="field"><span class="lbl">二重押し防止（秒）</span><input id="f-guard" type="number" min="0" max="60" step="1" value="${S.guard}"><span class="note">同じチームの連続タップをこの秒数だけ無視します</span></label>
     </div>
-    ${lock ? `<p class="note">計測が始まっているため、人数とチーム数は変更できません。名前の修正はできます。</p>` : ""}
+    ${lock ? `<p class="note">計測が始まっているため、人数・チーム数の変更と名簿の読み込みはできません。番号・名前・色の修正はできます。</p>` : ""}
   </div>
   <div class="panel">
     <div class="row" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">チームと走順（${S.teams.length}チーム）</h2>
       <button class="btn primary" id="addTeam" ${lock?"disabled":""}>チームを追加</button></div>
-    <div class="teams">${S.teams.map((t, i) => `
-      <div class="tedit" style="${tcs(i)}" data-team="${t.id}">
-        <div class="h"><button type="button" class="swatch" data-act="color" aria-label="${esc(t.name)}の色を変える" aria-expanded="${openPalette === t.id}">色</button><input class="tinput" data-f="name" value="${esc(t.name)}" aria-label="チーム名" placeholder="チーム名">
-          <button class="btn danger" data-act="del" ${lock?"disabled":""}>削除</button></div>
-        ${openPalette === t.id ? `<div class="palette">${COLORS.map(c => `<button type="button" data-col="${c}" style="background:${c}" aria-label="色 ${c}" aria-pressed="${color(i).toLowerCase() === c.toLowerCase()}"></button>`).join("")}
-          <label>ほかの色 <input type="color" data-f="color" value="${color(i)}"></label></div>` : ""}
+    ${lock ? "" : `<div class="import" id="dropzone">
+      <div class="row"><button class="btn primary" id="pickRoster">名簿ファイルを読み込む</button><span class="note">.xlsx / .csv。ここにドラッグしても読み込めます。</span></div>
+      <p class="note" style="margin:0">1行目に見出しを置いた表を読み込みます。使える見出しは「研究室名」「チーム名」「出走者1〜」「学年1〜」「番号」です。「番号」の列がなければ、上から順に1番から番号を振ります。</p>
+    </div>`}
+    ${pending ? `<div class="preview" id="preview">
+      <div><b>${esc(pending.source)}</b> から ${pending.teams.length}チーム・各${pending.legs}人を読み取りました。内容を確認して置き換えてください。</div>
+      <div class="tablebox"><table><thead><tr><th>番号</th><th>研究室</th><th>チーム</th>${Array.from({length: pending.legs}, (_, i) => `<th>${i+1}区</th>`).join("")}</tr></thead><tbody>
+      ${pending.teams.map(t => `<tr><td><span class="nob" style="${tcs(t)}">${t.no}</span></td><td class="sub">${esc(t.lab)}</td><td><b>${esc(t.name)}</b></td>${Array.from({length: pending.legs}, (_, i) => `<td>${esc(t.runners[i] || "")}${t.grades[i] ? ` <span class="note">${esc(t.grades[i])}</span>` : ""}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div>
+      <div class="row"><button class="btn primary" id="applyImport">このデータで置き換える</button><button class="btn" id="cancelImport">やめる</button>
+      <span class="note">今のチーム設定と計測前のデータは置き換わります。</span></div>
+    </div>` : ""}
+    ${dup.length ? `<div class="banner">番号 ${dup.join("・")} が重複しています。計測画面で見分けにくくなるので直してください。</div>` : ""}
+    <div class="teams">${byNo().map(t => `
+      <div class="tedit" style="${tcs(t)}" data-team="${t.id}">
+        <div class="h"><button type="button" class="swatch" data-act="color" aria-label="${esc(t.name)}の色を変える" aria-expanded="${openPalette === t.id}">色</button>
+          <input class="tinput tno" data-f="no" value="${t.no}" inputmode="numeric" aria-label="番号">
+          <input class="tinput tlab" data-f="lab" value="${esc(t.lab)}" aria-label="研究室名" placeholder="研究室名">
+          <input class="tinput tname" data-f="name" value="${esc(t.name)}" aria-label="チーム名" placeholder="チーム名">
+          <button class="btn danger sm" data-act="del" ${lock?"disabled":""}>削除</button></div>
+        ${openPalette === t.id ? `<div class="palette">${COLORS.map(c => `<button type="button" data-col="${c}" style="background:${c}" aria-label="色 ${c}" aria-pressed="${tc(t).toLowerCase() === c.toLowerCase()}"></button>`).join("")}
+          <label>ほかの色 <input type="color" data-f="color" value="${tc(t)}"></label></div>` : ""}
         <div class="runners">${Array.from({length: S.legs}, (_, k) => `
-          <label><span>${k+1}区</span><input class="tinput" data-f="r" data-k="${k}" value="${esc(t.runners[k] || "")}" placeholder="${k+1}走の名前"></label>`).join("")}
+          <label><span>${k+1}区</span><input class="tinput" data-f="r" data-k="${k}" value="${esc(t.runners[k] || "")}" placeholder="${k+1}走の名前"><input class="tinput gr" data-f="g" data-k="${k}" value="${esc(t.grades[k] || "")}" placeholder="学年" aria-label="${k+1}走の学年"></label>`).join("")}
         </div>
       </div>`).join("")}
     </div>
-    <details style="margin-top:16px" ${lock?"":""}>
-      <summary>エクセルから一括入力</summary>
-      <p class="note">1行に1チーム。「チーム名, 1区, 2区, …」の順にカンマかタブで区切ります。エクセルの範囲をコピーしてそのまま貼り付けられます。今のチーム設定は置き換わります。</p>
-      <textarea id="bulk" placeholder="1年A	青木	伊藤	上田	江藤	小川&#10;1年B	加藤	木村	工藤	剣持	小林"></textarea>
-      <div class="row" style="margin-top:8px"><button class="btn primary" id="bulkGo" ${lock?"disabled":""}>取り込む</button></div>
+    <details style="margin-top:16px">
+      <summary>表を貼り付けて入力</summary>
+      <p class="note">エクセルの範囲をコピーして貼り付けます。見出し行ごと貼れば名簿ファイルと同じように読み取ります。見出しがない場合は「チーム名, 1区, 2区, …」の順に読みます。</p>
+      <textarea id="bulk" placeholder="研究室名	チーム名	出走者1	出走者2	…"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn primary" id="bulkGo" ${lock?"disabled":""}>読み取る</button></div>
     </details>
   </div>
   <div class="panel">
@@ -352,37 +464,61 @@ function renderSetup(){
       <button class="btn" id="bk">バックアップを保存（.json）</button>
       <button class="btn" id="rs">バックアップから復元</button>
       <button class="btn danger ${armedReset > Date.now() ? "armed" : ""}" id="resetRace" ${started()?"":"disabled"}>${armedReset > Date.now() ? "もう一度押すと記録を消去" : "計測記録をリセット"}</button>
-      <button class="btn" id="clearSample">${S.sample ? "サンプルを消して空から作る" : "設定を空にする"}</button>
+      <button class="btn ${clearArmed > Date.now() ? "danger armed" : ""}" id="clearSample">${clearArmed > Date.now() ? "もう一度押すと記録も含めて消去" : S.sample ? "サンプルを消して空から作る" : "設定を空にする"}</button>
     </div>
   </div>`;
+  const dz = $("#dropzone");
+  if (dz) {
+    dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag"); });
+    dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+    dz.addEventListener("drop", e => { e.preventDefault(); dz.classList.remove("drag"); const f = e.dataTransfer.files[0]; if (f) readRosterFile(f); });
+  }
 }
-function touchSetup(){ if (S.sample) { S.sample = false; } save(); }
+function touchSetup(){ if (S.sample) S.sample = false; save(); }
 document.addEventListener("input", e => {
   const tg = e.target;
   if (tg.id === "f-ev") { S.eventName = tg.value; touchSetup(); $("#evName").textContent = S.eventName; return; }
   if (tg.id === "f-guard") { S.guard = Math.max(0, Math.min(60, +tg.value || 0)); save(); return; }
   const box = tg.closest(".tedit"); if (!box) return;
   const t = S.teams.find(x => x.id === box.dataset.team); if (!t) return;
-  if (tg.dataset.f === "name") t.name = tg.value;
-  if (tg.dataset.f === "r") t.runners[+tg.dataset.k] = tg.value;
-  if (tg.dataset.f === "color") { t.color = tg.value; box.style.setProperty("--tc", tg.value); box.style.setProperty("--tci", inkFor(tg.value)); box.querySelectorAll(".palette button").forEach(x => x.setAttribute("aria-pressed", "false")); }
+  const f = tg.dataset.f;
+  if (f === "name") t.name = tg.value;
+  else if (f === "lab") t.lab = tg.value;
+  else if (f === "r") t.runners[+tg.dataset.k] = tg.value;
+  else if (f === "g") t.grades[+tg.dataset.k] = tg.value;
+  else if (f === "color") { t.color = tg.value; box.style.setProperty("--tc", tg.value); box.style.setProperty("--tci", inkFor(tg.value)); box.querySelectorAll(".palette button").forEach(x => x.setAttribute("aria-pressed", "false")); }
   touchSetup();
 });
-let clearArmed = 0;
+document.addEventListener("change", e => {
+  const tg = e.target;
+  if (tg.dataset && tg.dataset.f === "no") {
+    const t = S.teams.find(x => x.id === tg.closest(".tedit").dataset.team);
+    const n = parseInt(norm(tg.value), 10);
+    if (Number.isFinite(n) && n >= 0) { t.no = n; touchSetup(); } else toast("番号は数字で入れてください");
+    renderSetup();
+  }
+});
 $("#v-setup").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "legMinus" || b.id === "legPlus") { S.legs = Math.max(1, Math.min(30, S.legs + (b.id === "legPlus" ? 1 : -1))); touchSetup(); renderSetup(); }
+  else if (b.id === "pickRoster") $("#rosterIn").click();
+  else if (b.id === "applyImport" && pending) {
+    S.teams = pending.teams; S.legs = pending.legs; S.race = { start: null, splits: {} };
+    const n = pending.teams.length; pending = null; openPalette = null; touchSetup(); renderSetup(); toast(`${n}チームを読み込みました`);
+  }
+  else if (b.id === "cancelImport") { pending = null; renderSetup(); }
   else if (b.dataset.act === "color") { const id = b.closest(".tedit").dataset.team; openPalette = openPalette === id ? null : id; renderSetup(); }
   else if (b.dataset.col) { const t = S.teams.find(x => x.id === b.closest(".tedit").dataset.team); t.color = b.dataset.col; save(); renderSetup(); }
-  else if (b.id === "addTeam") { S.teams.push({ id: uid(), name: `チーム${S.teams.length + 1}`, runners: [] }); touchSetup(); renderSetup(); }
+  else if (b.id === "addTeam") {
+    const no = Math.max(0, ...S.teams.map(t => t.no)) + 1;
+    S.teams.push({ id: uid(), no, lab: "", name: `チーム${no}`, runners: [], grades: [], color: COLORS[(no - 1) % COLORS.length] }); touchSetup(); renderSetup();
+  }
   else if (b.dataset.act === "del") { const id = b.closest(".tedit").dataset.team; S.teams = S.teams.filter(t => t.id !== id); delete S.race.splits[id]; touchSetup(); renderSetup(); }
   else if (b.id === "bulkGo") {
-    const lines = $("#bulk").value.split(/\r?\n/).map(l => l.split(/\t|,|，/).map(s => s.trim())).filter(c => c[0]);
-    if (!lines.length) { toast("取り込む行がありません"); return; }
-    S.teams = lines.map(c => ({ id: uid(), name: c[0], runners: c.slice(1).filter((_, i, a) => true) }));
-    const mx = Math.max(...S.teams.map(t => { let r = t.runners; while (r.length && !r[r.length-1]) r.pop(); return r.length; }));
-    if (mx > 0) S.legs = mx;
-    S.race = { start: null, splits: {} }; touchSetup(); renderSetup(); toast(`${S.teams.length}チームを取り込みました`);
+    const lines = $("#bulk").value.split(/\r?\n/).map(l => l.split(/\t|,|，/));
+    const res = parseAoa(lines);
+    if (!res) { toast("読み取れる行がありません"); return; }
+    finishImport(res, "貼り付けた表"); renderSetup();
   }
   else if (b.id === "bk") backup();
   else if (b.id === "rs") $("#fileIn").click();
@@ -393,9 +529,9 @@ $("#v-setup").addEventListener("click", e => {
   }
   else if (b.id === "clearSample") {
     if (clearArmed > Date.now() || S.sample) {
-      S = { v: 1, sample: false, eventName: S.sample ? "" : S.eventName, legs: S.legs, guard: S.guard, teams: [{ id: uid(), name: "チーム1", runners: [] }], race: { start: null, splits: {} } };
+      S = { v: 2, sample: false, eventName: S.sample ? "" : S.eventName, legs: S.legs, guard: S.guard, teams: [{ id: uid(), no: 1, lab: "", name: "チーム1", runners: [], grades: [], color: COLORS[0] }], race: { start: null, splits: {} } };
       clearArmed = 0; save(); renderSetup(); toast("設定を空にしました");
-    } else { clearArmed = Date.now() + 4000; b.textContent = "もう一度押すと記録も含めて消去"; b.classList.add("danger","armed"); }
+    } else { clearArmed = Date.now() + 4000; renderSetup(); setTimeout(() => view === "setup" && renderSetup(), 4100); }
   }
 });
 $("#fileIn").addEventListener("change", e => {
@@ -405,7 +541,7 @@ $("#fileIn").addEventListener("change", e => {
     try {
       const d = JSON.parse(rd.result);
       if (!Array.isArray(d.teams) || !d.legs || !d.race) throw 0;
-      S = d; save(); render(); toast("バックアップから復元しました");
+      S = d; migrate(); save(); render(); toast("バックアップから復元しました");
     } catch(err) { toast("このファイルは読み込めませんでした。このアプリで保存した .json を選んでください"); }
     e.target.value = "";
   };
@@ -414,66 +550,94 @@ $("#fileIn").addEventListener("change", e => {
 
 /* ---------- race ---------- */
 const lastTap = {}; const undoArmed = {};
+let hitId = null;
 function renderRace(){
   const el = $("#v-race");
   const st = started(), done = allDone();
   const finishedCount = S.teams.filter(finished).length;
   const endEp = done ? Math.max(...S.teams.map(t => splits(t)[S.legs - 1])) : null;
-  el.innerHTML = `${sampleBanner()}
+  el.innerHTML = `${st ? "" : sampleBanner()}
   <div class="board">
     <div class="clock" ${st && !done ? `data-since="${S.race.start}"` : ""}>${st ? fmtDur((done ? endEp : Date.now()) - S.race.start) : "0:00.0"}</div>
     <div class="clockmeta">
       <span class="status ${done ? "done" : st ? "run" : ""}"><span class="dot"></span>${done ? "全チームゴール" : st ? "計測中" : "スタート前"}</span>
-      <span class="note">${st ? `スタート ${fmtClock(S.race.start, true)} ・ 完走 ${finishedCount} / ${S.teams.length} チーム` : `${S.teams.length}チーム × ${S.legs}区`}</span>
+      <span class="note">${st ? `スタート ${fmtClock(S.race.start, true)} ・ ゴール ${finishedCount} / ${S.teams.length}` : `${S.teams.length}チーム × ${S.legs}区`}</span>
     </div>
     <span class="spacer"></span>
-    ${st ? "" : `<button class="startbtn" id="startBtn" ${S.teams.length ? "" : "disabled"}>スタート</button>`}
+    ${st ? `<button class="btn sm" id="editStart">スタート時刻を修正</button><a class="btn sm" href="#results">記録を見る</a>` : `<button class="startbtn" id="startBtn" ${S.teams.length ? "" : "disabled"}>スタート</button>`}
   </div>
-  <div class="grid">${S.teams.map((t, i) => teamCard(t, i)).join("")}</div>
-  <div class="toolbar">
-    ${st ? `<button class="btn" id="editStart">スタート時刻を修正</button>` : ""}
-    <a class="btn" href="#results" style="text-decoration:none">記録を見る</a>
-  </div>
-  <p class="note" style="margin-top:12px">タスキを渡した瞬間にそのチームの赤いボタンを押します。押し間違えたときは「取消」を2回押すと直前の記録が消えます。チームの並びは固定です。</p>`;
+  ${st ? "" : `<p class="note prehint">スタート後、タスキを渡した瞬間にそのチームのボタン（番号の札）を押します。押し間違えたら右下の「取消」を2回押します。</p>`}
+  <div class="tiles" id="tiles">${byNo().map(tile).join("")}</div>`;
+  if (hitId) { const h = el.querySelector(`.tile[data-team="${hitId}"]`); if (h) h.classList.add("hit"); hitId = null; }
+  fitTiles();
 }
-function teamCard(t, i){
+function tile(t){
   const sp = splits(t), n = sp.length, st = started(), fin = finished(t);
-  const pos = positionOf(t);
-  const prev = n > 0 ? `${n}区 ${esc(t.runners[n-1] || "")} <span class="num">${fmtDur(sp[n-1] - legStart(t, n-1))}</span>` : "";
   const ua = undoArmed[t.id] > Date.now();
-  const undo = n > 0 ? `<button class="undo ${ua ? "armed" : ""}" data-act="undo">${ua ? "もう一度押すと取消" : "取消"}</button>` : "";
+  const undo = n > 0 ? `<button class="undo ${ua ? "armed" : ""}" data-act="undo" aria-label="${esc(label(t))}の直前の記録を取り消す">${ua ? "もう一度" : "取消"}</button>` : "";
+  let meta;
   if (fin) {
-    const ranks = standings().filter(x => finished(x.t));
-    const r = ranks.findIndex(x => x.t === t) + 1;
-    return `<article class="team done" style="${tcs(i)}" data-team="${t.id}">
-      <div class="hd"><span class="chip">${esc(t.name)}</span><span class="legpos">ゴール ${fmtClock(sp[S.legs-1])}</span></div>
-      <div class="fin"><b>${r}位</b>完走</div>
-      <div><span class="lbl">総合タイム</span><div class="legtime">${fmtDur(total(t))}</div></div>
-      <div class="prev">アンカー ${prev}</div>${undo}</article>`;
+    const r = standings().filter(x => finished(x.t)).findIndex(x => x.t === t) + 1;
+    meta = `<span class="fin">ゴール ${r}位</span><span class="lt">${fmtDur(total(t))}</span>`;
+  } else {
+    meta = `<span class="leg">${n+1}/${S.legs}区</span><span class="rn">${esc(t.runners[n] || "")}</span>` +
+      (st ? `<span class="lt" data-since="${legStart(t, n)}">${fmtDur(Date.now() - legStart(t, n))}</span>` : "");
   }
-  const isLast = n === S.legs - 1;
-  return `<article class="team" style="${tcs(i)}" data-team="${t.id}">
-    <div class="hd"><span class="chip">${esc(t.name)}</span>${pos ? `<span class="rank">${pos}位</span>` : ""}<span class="legpos">${n+1}区 / ${S.legs}区</span></div>
-    <div><span class="lbl">${st ? "走行中" : "第1走者"}</span><div class="runner">${esc(t.runners[n] || `${n+1}走`)}</div></div>
-    <div class="legtime" ${st ? `data-since="${legStart(t, n)}"` : ""}>${st ? fmtDur(Date.now() - legStart(t, n)) : "0:00.0"}</div>
-    <div class="prev">${prev ? "前区間 " + prev : ""}</div>
-    <button class="pass ${isLast ? "goal" : ""}" data-act="pass" ${st ? "" : "disabled"}>${isLast ? "ゴール" : "タスキ渡し"}<small>${isLast ? `${esc(t.runners[n] || "")} がフィニッシュ` : `→ ${n+2}区 ${esc(t.runners[n+1] || "")}`}</small></button>
-    ${undo}</article>`;
+  const cls = ["tile", !st ? "idle" : "", fin ? "done" : "", (!fin && n === S.legs - 1) ? "anchor" : "", undo ? "has-undo" : ""].filter(Boolean).join(" ");
+  return `<div class="${cls}" style="${tcs(t)}" data-team="${t.id}" role="button" tabindex="${st && !fin ? 0 : -1}" aria-disabled="${!st || fin}" aria-label="${esc(label(t))}（${esc(t.lab)}）${fin ? "ゴール済み" : `${n+1}区 タスキ渡し`}">
+    <div class="no">${t.no}</div>
+    <div class="body">
+      <div class="lab">${esc(t.lab) || "&nbsp;"}</div>
+      <div class="tn">${esc(t.name)}</div>
+      <div class="meta">${meta}</div>
+    </div>
+    ${undo}
+  </div>`;
 }
-$("#v-race").addEventListener("pointerdown", e => {
-  const b = e.target.closest('button[data-act="pass"]'); if (!b || b.disabled) return;
-  e.preventDefault();
+function fitTiles(){
+  const g = $("#tiles"); if (!g) return;
+  const n = Math.max(1, S.teams.length), gap = 8;
+  const W = g.clientWidth;
+  const padB = parseFloat(getComputedStyle(document.documentElement).paddingBottom) || 0;
+  const H = window.innerHeight - g.getBoundingClientRect().top - padB - 20;
+  let best = null;
+  for (let c = 1; c <= n; c++) {
+    const r = Math.ceil(n / c);
+    const w = (W - (c - 1) * gap) / c, h = (H - (r - 1) * gap) / r;
+    if (w < 140 && c > 1) break;
+    const score = Math.min(w / 1.55, h);
+    if (!best || score > best.score) best = { c, h, w, score };
+  }
+  let c = best.c, h = Math.min(best.h, 190);
+  if (h < 92) { c = Math.max(1, Math.floor((W + gap) / (190 + gap))); h = 104; }   // 画面が小さいときはスクロール
+  g.style.gridTemplateColumns = `repeat(${c}, minmax(0, 1fr))`;
+  g.style.gridAutoRows = `${Math.floor(h)}px`;
+  const scale = Math.max(.72, Math.min(1.25, Math.min(h / 140, ((W - (c - 1) * gap) / c) / 220)));
+  g.style.setProperty("--nofs", `${Math.round(36 * scale)}px`);
+  g.style.setProperty("--tnfs", `${Math.round(18 * scale)}px`);
+}
+window.addEventListener("resize", () => { if (view === "race") fitTiles(); });
+function pass(id){
   const now = Date.now();
-  const id = b.closest(".team").dataset.team, t = S.teams.find(x => x.id === id);
+  const t = S.teams.find(x => x.id === id);
   if (!t || !started() || finished(t)) return;
-  if (lastTap[id] && now - lastTap[id] < S.guard * 1000) { toast(`${t.name}：${S.guard}秒以内の連続タップは無視しました`); return; }
+  if (lastTap[id] && now - lastTap[id] < S.guard * 1000) { toast(`${label(t)}：${S.guard}秒以内の連続タップは無視しました`); return; }
   lastTap[id] = now;
   splits(t).push(now); save();
   const n = splits(t).length;
-  renderRace();
-  const card = $(`.team[data-team="${id}"]`); if (card) { card.classList.add("flash"); }
-  toast(finished(t) ? `${t.name} ゴール ${fmtDur(total(t))}` : `${t.name} ${n}区 ${t.runners[n-1] || ""} ${fmtDur(splits(t)[n-1] - legStart(t, n-1))}`);
+  hitId = id; renderRace();
+  toast(finished(t) ? `${label(t)} ゴール ${fmtDur(total(t))}` : `${label(t)} ${n}区 ${t.runners[n-1] || ""} ${fmtDur(splits(t)[n-1] - legStart(t, n-1))}`);
   if (allDone()) releaseWake();
+}
+$("#v-race").addEventListener("pointerdown", e => {
+  if (e.target.closest(".undo")) return;
+  const tl = e.target.closest(".tile"); if (!tl || tl.classList.contains("idle") || tl.classList.contains("done")) return;
+  e.preventDefault(); pass(tl.dataset.team);
+});
+$("#v-race").addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("tile")) {
+    e.preventDefault(); if (!e.target.classList.contains("idle") && !e.target.classList.contains("done")) pass(e.target.dataset.team);
+  }
 });
 $("#v-race").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -482,10 +646,10 @@ $("#v-race").addEventListener("click", e => {
     S.race = { start: Date.now(), splits: {} }; S.teams.forEach(t => S.race.splits[t.id] = []);
     save(); requestWake(); renderRace(); toast("スタートしました");
   } else if (b.dataset.act === "undo") {
-    const id = b.closest(".team").dataset.team, t = S.teams.find(x => x.id === id);
+    const id = b.closest(".tile").dataset.team, t = S.teams.find(x => x.id === id);
     if (undoArmed[id] > Date.now()) {
-      const v = splits(t).pop(); undoArmed[id] = 0; save(); renderRace();
-      toast(`${t.name}：${fmtClock(v, true)} の記録を取り消しました`);
+      const v = splits(t).pop(); undoArmed[id] = 0; delete lastTap[id]; save(); renderRace();
+      toast(`${label(t)}：${fmtClock(v, true)} の記録を取り消しました`);
     } else { undoArmed[id] = Date.now() + 3000; renderRace(); setTimeout(() => view === "race" && renderRace(), 3100); }
   } else if (b.id === "editStart") openEdit({ type: "start" });
 });
@@ -505,7 +669,7 @@ function renderResults(){
     ${rMode === "ind" ? `<label class="row note" style="gap:6px">区間 <select id="legSel" class="tinput" style="width:auto">${legOpts}</select></label>` : ""}
   </div>
   <div class="tablebox">${rMode === "ind" ? indTable() : teamTable()}</div>
-  <p class="note">${rMode === "ind" ? "見出しを押すと並び替えます。赤字は区間1位。「修正」でタスキを渡した時刻を直せます。" : "完走チームは総合タイム順、走行中のチームは進んだ区間順に並びます。"}</p>
+  <p class="note">${rMode === "ind" ? "見出しを押すと並び替えます。赤字は区間1位。「修正」でタスキを渡した時刻を直せます。" : "ゴールしたチームは総合タイム順、走行中のチームは進んだ区間順に並びます。"}</p>
   ${exportBar()}`;
 }
 function exportBar(){
@@ -519,7 +683,7 @@ function exportBar(){
 }
 function sortVal(r, k){
   switch(k){
-    case "team": return r.ti; case "leg": return r.leg; case "name": return r.name;
+    case "no": return r.team.no; case "lab": return r.team.lab; case "team": return r.team.name; case "leg": return r.leg; case "name": return r.name;
     case "lap": return r.lap; case "rank": return r.rank; case "start": return r.start; case "end": return r.end;
   }
 }
@@ -528,33 +692,34 @@ function indTable(){
   if (legFilter !== "all") rows = rows.filter(r => r.leg == legFilter);
   rows.sort((a, b) => {
     const x = sortVal(a, sortKey), y = sortVal(b, sortKey);
-    if (x == null && y == null) return a.ti - b.ti || a.leg - b.leg;
-    if (x == null) return 1; if (y == null) return -1;
+    const tie = a.team.no - b.team.no || a.leg - b.leg;
+    if ((x == null || x === "") && (y == null || y === "")) return tie;
+    if (x == null || x === "") return 1; if (y == null || y === "") return -1;
     const c = typeof x === "string" ? x.localeCompare(y, "ja") : x - y;
-    return c * sortDir || a.ti - b.ti || a.leg - b.leg;
+    return c * sortDir || tie;
   });
-  const th = (k, label) => `<th><button data-sort="${k}" ${sortKey === k ? `data-dir="${sortDir > 0 ? "▲" : "▼"}"` : ""}>${label}</button></th>`;
-  return `<table><thead><tr>${th("team","チーム")}${th("leg","走順")}${th("name","名前")}${th("lap","区間タイム")}${th("rank","区間順位")}${th("start","走り始め")}${th("end","走り終わり")}<th></th></tr></thead><tbody>
+  const th = (k, l) => `<th><button data-sort="${k}" ${sortKey === k ? `data-dir="${sortDir > 0 ? "▲" : "▼"}"` : ""}>${l}</button></th>`;
+  return `<table><thead><tr>${th("no","番号")}${th("lab","研究室")}${th("team","チーム")}${th("leg","走順")}${th("name","名前")}<th>学年</th>${th("lap","区間タイム")}${th("rank","区間順位")}${th("start","走り始め")}${th("end","走り終わり")}<th></th></tr></thead><tbody>
   ${rows.map(r => `<tr>
-    <td style="${tcs(r.ti)}"><span class="tdot"></span>${esc(r.team.name)}</td>
-    <td class="t">${r.leg}区</td><td>${esc(r.name)}</td>
-    <td class="t ${r.rank === 1 ? "best" : ""}">${r.lap != null ? fmtDur(r.lap) : (r.start != null && !finished(r.team) && splits(r.team).length === r.leg - 1 ? "走行中" : "—")}</td>
+    <td><span class="nob" style="${tcs(r.team)}">${r.team.no}</span></td>
+    <td class="sub">${esc(r.team.lab)}</td><td>${esc(r.team.name)}</td>
+    <td class="t">${r.leg}区</td><td>${esc(r.name)}</td><td class="sub">${esc(r.grade)}</td>
+    <td class="t ${r.rank === 1 ? "best" : ""}">${r.lap != null ? fmtDur(r.lap) : (r.start != null && splits(r.team).length === r.leg - 1 ? "走行中" : "—")}</td>
     <td class="t">${r.rank ?? "—"}</td>
     <td class="t">${fmtClock(r.start, true)}</td><td class="t">${fmtClock(r.end, true)}</td>
     <td>${r.end != null ? `<button class="mini" data-edit="${r.team.id}" data-i="${r.leg - 1}">修正</button>` : ""}</td>
   </tr>`).join("")}</tbody></table>`;
 }
 function teamTable(){
-  const st = standings();
   const legRk = Array.from({length: S.legs}, (_, i) => legRanks(i));
   let place = 0;
-  return `<table><thead><tr><th>順位</th><th>チーム</th><th>総合タイム</th><th>状況</th>${Array.from({length: S.legs}, (_, i) => `<th>${i+1}区</th>`).join("")}<th>ゴール時刻</th></tr></thead><tbody>
-  ${st.map(({ t, idx, n }) => {
+  return `<table><thead><tr><th>順位</th><th>番号</th><th>研究室</th><th>チーム</th><th>総合タイム</th><th>状況</th>${Array.from({length: S.legs}, (_, i) => `<th>${i+1}区</th>`).join("")}<th>ゴール時刻</th></tr></thead><tbody>
+  ${standings().map(({ t, n }) => {
     const fin = finished(t); if (fin) place++;
     return `<tr><td class="rk">${fin ? place : "—"}</td>
-      <td style="${tcs(idx)}"><span class="tdot"></span>${esc(t.name)}</td>
+      <td><span class="nob" style="${tcs(t)}">${t.no}</span></td><td class="sub">${esc(t.lab)}</td><td>${esc(t.name)}</td>
       <td class="t">${fin ? fmtDur(total(t)) : "—"}</td>
-      <td>${fin ? "完走" : n === 0 ? "1区 走行中" : `${n+1}区 走行中`}</td>
+      <td>${fin ? "ゴール" : `${n+1}区 走行中`}</td>
       ${Array.from({length: S.legs}, (_, i) => n > i ? `<td class="t ${legRk[i][t.id] === 1 ? "best" : ""}" title="${esc(t.runners[i] || "")}">${fmtDur(splits(t)[i] - legStart(t, i))}</td>` : `<td class="t">—</td>`).join("")}
       <td class="t">${fin ? fmtClock(splits(t)[S.legs-1], true) : "—"}</td></tr>`;
   }).join("")}</tbody></table>`;
@@ -580,7 +745,7 @@ function openEdit(target){
     $("#mInput").value = fmtClock(S.race.start, true);
   } else {
     const t = S.teams.find(x => x.id === target.id);
-    $("#mTitle").textContent = `${t.name} ${target.i+1}区の走り終わり時刻`;
+    $("#mTitle").textContent = `${label(t)} ${target.i+1}区の走り終わり時刻`;
     $("#mNote").textContent = `${t.runners[target.i] || ""} がタスキを渡した（ゴールした）時刻を「時:分:秒.1/10秒」で入れます。この区間と次の区間のタイムが変わります。`;
     $("#mInput").value = fmtClock(splits(t)[target.i], true);
   }
@@ -626,23 +791,22 @@ function clockFrac(ep){ const d = new Date(ep); return (d.getHours()*3600000 + d
 function exportXlsx(){
   if (typeof XLSX === "undefined") { toast("エクセル出力の部品を読み込めませんでした。CSVで保存してください"); return; }
   const wb = XLSX.utils.book_new();
-  // team sheet
-  const st = standings(); let place = 0;
-  const tHead = ["順位","チーム名","総合タイム", ...Array.from({length: S.legs}, (_, i) => `${i+1}区`), "ゴール時刻"];
-  const tRows = st.map(({ t, n }) => { const fin = finished(t); if (fin) place++;
-    return [fin ? place : "", t.name, fin ? total(t) / DAY : "", ...Array.from({length: S.legs}, (_, i) => n > i ? (splits(t)[i] - legStart(t, i)) / DAY : ""), fin ? clockFrac(splits(t)[S.legs-1]) : ""]; });
+  let place = 0;
+  const L = S.legs;
+  const tHead = ["順位","番号","研究室名","チーム名","総合タイム", ...Array.from({length: L}, (_, i) => `${i+1}区`), "ゴール時刻"];
+  const tRows = standings().map(({ t, n }) => { const fin = finished(t); if (fin) place++;
+    return [fin ? place : "", t.no, t.lab, t.name, fin ? total(t) / DAY : "", ...Array.from({length: L}, (_, i) => n > i ? (splits(t)[i] - legStart(t, i)) / DAY : ""), fin ? clockFrac(splits(t)[L-1]) : ""]; });
   const ws1 = XLSX.utils.aoa_to_sheet([tHead, ...tRows]);
-  fmtCols(ws1, tRows.length, [2, ...Array.from({length: S.legs}, (_, i) => 3 + i)], "[h]:mm:ss.0");
-  fmtCols(ws1, tRows.length, [3 + S.legs], "hh:mm:ss.0");
-  ws1["!cols"] = tHead.map((_, i) => ({ wch: i === 1 ? 16 : 11 }));
+  fmtCols(ws1, tRows.length, [4, ...Array.from({length: L}, (_, i) => 5 + i)], "[h]:mm:ss.0");
+  fmtCols(ws1, tRows.length, [5 + L], "hh:mm:ss.0");
+  ws1["!cols"] = tHead.map((_, i) => ({ wch: i === 2 ? 14 : i === 3 ? 20 : 10 }));
   XLSX.utils.book_append_sheet(wb, ws1, "チーム総合");
-  // individual sheet (team order, leg order)
-  const iHead = ["チーム名","走順","名前","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"];
-  const iRows = individualRows().map(r => [r.team.name, r.leg, r.name, r.lap != null ? r.lap / DAY : "", r.rank ?? "", r.start != null ? clockFrac(r.start) : "", r.end != null ? clockFrac(r.end) : "", total(r.team) != null ? total(r.team) / DAY : ""]);
+  const iHead = ["番号","研究室名","チーム名","走順","名前","学年","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"];
+  const iRows = individualRows().map(r => [r.team.no, r.team.lab, r.team.name, r.leg, r.name, r.grade, r.lap != null ? r.lap / DAY : "", r.rank ?? "", r.start != null ? clockFrac(r.start) : "", r.end != null ? clockFrac(r.end) : "", total(r.team) != null ? total(r.team) / DAY : ""]);
   const ws2 = XLSX.utils.aoa_to_sheet([iHead, ...iRows]);
-  fmtCols(ws2, iRows.length, [3, 7], "[h]:mm:ss.0");
-  fmtCols(ws2, iRows.length, [5, 6], "hh:mm:ss.0");
-  ws2["!cols"] = [16, 6, 14, 11, 8, 13, 13, 14].map(w => ({ wch: w }));
+  fmtCols(ws2, iRows.length, [6, 10], "[h]:mm:ss.0");
+  fmtCols(ws2, iRows.length, [8, 9], "hh:mm:ss.0");
+  ws2["!cols"] = [6, 14, 20, 6, 16, 10, 11, 8, 13, 13, 14].map(w => ({ wch: w }));
   ws2["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: iRows.length, c: iHead.length - 1 } }) };
   XLSX.utils.book_append_sheet(wb, ws2, "個人記録");
   const info = XLSX.utils.aoa_to_sheet([["大会名", S.eventName], ["スタート時刻", fmtClock(S.race.start, true)], ["チーム数", S.teams.length], ["区間数", S.legs], ["書き出し", new Date().toLocaleString("ja-JP")]]);
@@ -656,8 +820,8 @@ function fmtCols(ws, n, cols, z){
 }
 function exportCsv(){
   const q = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const lines = [["チーム名","走順","名前","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"].join(",")];
-  individualRows().forEach(r => lines.push([r.team.name, r.leg, r.name, r.lap != null ? fmtDur(r.lap) : "", r.rank ?? "", fmtClock(r.start, true).replace("—",""), fmtClock(r.end, true).replace("—",""), total(r.team) != null ? fmtDur(total(r.team)) : ""].map(q).join(",")));
+  const lines = [["番号","研究室名","チーム名","走順","名前","学年","区間タイム","区間順位","走り始めた時刻","走り終えた時刻","チーム総合タイム"].join(",")];
+  individualRows().forEach(r => lines.push([r.team.no, r.team.lab, r.team.name, r.leg, r.name, r.grade, r.lap != null ? fmtDur(r.lap) : "", r.rank ?? "", r.start != null ? fmtClock(r.start, true) : "", r.end != null ? fmtClock(r.end, true) : "", total(r.team) != null ? fmtDur(total(r.team)) : ""].map(q).join(",")));
   saveFile(baseName() + "_個人記録.csv", "﻿" + lines.join("\r\n"), "text/csv");
 }
 
@@ -669,7 +833,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 setInterval(() => {
   if (view !== "race" || !started()) return;
   const now = Date.now();
-  document.querySelectorAll("[data-since]").forEach(el => { el.textContent = fmtDur(now - +el.dataset.since); });
+  document.querySelectorAll("#v-race [data-since]").forEach(el => { el.textContent = fmtDur(now - +el.dataset.since); });
 }, 100);
 
 window.addEventListener("hashchange", route);
